@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="ASCO患者団体">
+<title>ASCO 2026 患者団体検索</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',sans-serif;background:#F5F6F8;color:#1a1a1a;min-height:100vh}
+
+.app-header{background:#fff;border-bottom:1px solid #E5E7EB;padding:14px 16px 12px;position:sticky;top:0;z-index:100}
+.app-title{font-size:15px;font-weight:600;color:#0C3B6E;letter-spacing:-0.2px}
+.app-subtitle{font-size:11px;color:#6B7280;margin-top:2px}
+
+.search-section{background:#fff;padding:12px 16px;border-bottom:1px solid #E5E7EB;position:sticky;top:57px;z-index:99}
+.search-wrap{position:relative;margin-bottom:10px}
+.search-icon{position:absolute;left:11px;top:50%;transform:translateY(-50%);font-size:15px;pointer-events:none}
+.search-wrap input{width:100%;padding:10px 36px 10px 36px;font-size:15px;border:1.5px solid #D1D5DB;border-radius:12px;background:#F9FAFB;color:#1a1a1a;outline:none;-webkit-appearance:none}
+.search-wrap input:focus{border-color:#2563EB;background:#fff}
+.clear-btn{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:#9CA3AF;color:#fff;border:none;border-radius:50%;width:20px;height:20px;font-size:13px;cursor:pointer;display:none;align-items:center;justify-content:center;line-height:1}
+
+.filter-row{display:flex;gap:8px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}
+.filter-row::-webkit-scrollbar{display:none}
+.filter-row select{font-size:12px;padding:6px 10px;border:1px solid #D1D5DB;border-radius:20px;background:#fff;color:#374151;cursor:pointer;white-space:nowrap;flex-shrink:0;-webkit-appearance:none;appearance:none;padding-right:22px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%236B7280'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center}
+.filter-row select.active-filter{border-color:#2563EB;color:#2563EB;background-color:#EFF6FF}
+
+.tags-section{background:#fff;padding:8px 16px 10px;border-bottom:1px solid #E5E7EB;overflow-x:auto;white-space:nowrap;scrollbar-width:none}
+.tags-section::-webkit-scrollbar{display:none}
+.tag-btn{display:inline-block;font-size:12px;padding:5px 12px;border:1px solid #D1D5DB;border-radius:20px;background:#fff;color:#4B5563;cursor:pointer;margin-right:6px;white-space:nowrap;transition:all .15s}
+.tag-btn.active{background:#0C3B6E;color:#fff;border-color:#0C3B6E}
+
+.stats-bar{padding:8px 16px;display:flex;justify-content:space-between;align-items:center}
+.stats-text{font-size:12px;color:#6B7280}
+.reset-btn{font-size:12px;color:#2563EB;background:none;border:none;cursor:pointer;padding:4px 0}
+
+.results{padding:0 12px 80px}
+.card{background:#fff;border-radius:14px;padding:14px 16px;margin-bottom:10px;box-shadow:0 1px 3px rgba(0,0,0,.06);border:1px solid #F3F4F6}
+.card-header{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:8px}
+.card-name{font-size:14px;font-weight:600;color:#111827;line-height:1.4;flex:1}
+.card-booth{font-size:10px;font-weight:600;padding:3px 8px;border-radius:20px;white-space:nowrap;flex-shrink:0;margin-top:1px}
+.booth-main{background:#DBEAFE;color:#1D4ED8}
+.booth-indep{background:#D1FAE5;color:#065F46}
+.disease-tag{display:inline-block;font-size:11px;font-weight:500;color:#2563EB;background:#EFF6FF;padding:3px 9px;border-radius:6px;margin-bottom:8px}
+.card-activity{font-size:13px;color:#4B5563;line-height:1.6}
+.card-footer{margin-top:10px;padding-top:9px;border-top:1px solid #F3F4F6;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.card-type{font-size:11px;color:#9CA3AF}
+.card-link{font-size:11px;color:#2563EB;word-break:break-all;text-decoration:none;flex:1;text-align:right}
+.card-link:active{opacity:.6}
+
+.highlight{background:#FEF08A;border-radius:2px;padding:0 1px}
+
+.empty{text-align:center;padding:60px 20px;color:#9CA3AF}
+.empty-icon{font-size:40px;margin-bottom:12px}
+.empty-text{font-size:14px}
+
+@media(min-width:600px){
+  .results{padding:0 16px 40px}
+  .card{border-radius:16px;padding:16px 20px}
+  .card-name{font-size:15px}
+  .card-activity{font-size:14px}
+}
+</style>
+</head>
+<body>
+
+<div class="app-header">
+  <div class="app-title">🏥 ASCO 2026 患者団体検索</div>
+  <div class="app-subtitle">May 30–Jun 1 · McCormick Place, Chicago · 58団体</div>
+</div>
+
+<div class="search-section">
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input type="search" id="searchInput" placeholder="団体名・疾患・活動内容で検索" oninput="onSearch()" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+    <button class="clear-btn" id="clearBtn" onclick="clearSearch()">×</button>
+  </div>
+  <div class="filter-row">
+    <select id="diseaseFilter" onchange="render()">
+      <option value="">疾患領域 ▾</option>
+    </select>
+    <select id="typeFilter" onchange="render()">
+      <option value="">出展形式 ▾</option>
+      <option value="ASCO®主催無料ブース">ASCO主催 #13000</option>
+      <option value="独立ブース">独立ブース</option>
+    </select>
+  </div>
+</div>
+
+<div class="tags-section">
+  <button class="tag-btn" onclick="setTag(this,'がん全般')">がん全般</button>
+  <button class="tag-btn" onclick="setTag(this,'肺がん')">肺がん</button>
+  <button class="tag-btn" onclick="setTag(this,'乳がん')">乳がん</button>
+  <button class="tag-btn" onclick="setTag(this,'血液がん')">血液がん</button>
+  <button class="tag-btn" onclick="setTag(this,'脳腫瘍')">脳腫瘍</button>
+  <button class="tag-btn" onclick="setTag(this,'大腸がん')">大腸がん</button>
+  <button class="tag-btn" onclick="setTag(this,'膵臓がん')">膵臓がん</button>
+  <button class="tag-btn" onclick="setTag(this,'AYA')">AYA世代</button>
+  <button class="tag-btn" onclick="setTag(this,'希少')">希少がん</button>
+  <button class="tag-btn" onclick="setTag(this,'研究')">研究支援</button>
+  <button class="tag-btn" onclick="setTag(this,'政策')">政策提唱</button>
+</div>
+
+<div class="stats-bar">
+  <span class="stats-text" id="statsText">58件表示中</span>
+  <button class="reset-btn" onclick="resetAll()">リセット</button>
+</div>
+
+<div class="results" id="results"></div>
+
+<script>
+const DATA = [
+  {name:"Accessia Health",disease:"がん全般・慢性疾患",activity:"医療費支援・患者アクセス向上・コパイ支援プログラム",url:"https://www.accessiahealth.org",booth:"13000",type:"ASCO®主催無料ブース"},
+  {name:"Alliance for Fertility Preservation",disease:"がん全般（妊孕性）",activity:"がん治療による妊孕性喪失防止・生殖医療アクセス支援",url:"https://www.allianceforfertilitypreservation.org",booth:"13000",type:"ASCO®主催無料ブース"},
+  {name:"American Brain Tumor Association",disease:"脳腫瘍",activity:"脳腫瘍患者・家族支援、教育・研究資金助成",url:"https://www.abta.org",booth:"13000",type:"ASCO®主催無料ブース"},
+  {name:"American Lung Cancer Screening Initiative",disease:"肺がん",activity:"肺がん検診推進・早期発見啓発",url:"https://www.lungcancerscreening.org",booth:"13000",type:"ASCO®主催無料ブース"},
+  {name:"Bladder Cancer Advocacy Network",disease:"膀胱がん",activity:"膀胱がん患者支援・アドボカシー・研究資金助成",url:"https://www.bcan.org",booth:"13000",type:"ASCO®主催無料ブース"},
+  {name:"Cancer and Careers",disease:"がん全般（就労）",activity:"がん患者の就労継続支援・職場復帰リソース提供",url:"https://www.cancerandcareers.org",booth:"13000",type:"ASCO®主催無料ブース"},
+  {name:"Cancer Support Community",disease:"がん全般",activity:"がん患者・家族向け心理社会的支援・コミュニティ提供",url:"https://www.cancersupportcommunity.org",booth:"13000",type:"ASCO®主催無料ブース"},
+  {name:"CANCER101",disease:"がん全般",activity:"患者教育・がん診断後の情報ナビゲーション支援",url:"https://www.cancer101.org",booth:"13000",type:"ASCO®主催無料ブース"},
+  {name:"CancerCare",disease:"がん全般",activity:"無料カウンセリング・経済支援・教育プログラム提供",url:"https://www.cancercare.org",booth:"13000",type:"ASCO®主催無料ブース"},
+  {name:"Cholangiocarcinoma Foundation",disease:"胆管がん",activity:"胆管がん研究支援・患者啓発・医師教育",url:"https://www.cholangiocarcinoma.org",booth:"13000",type:"ASCO®主催無料ブース"},
+  {name:"Colorectal Cancer Alliance",disease:"大腸がん",activity:"大腸がん啓発・スクリーニング推進・患者支援",url:"https://www.ccalliance.org",booth:"13000",type:"ASCO®主催無料ブース"},
+  {name:"Dear Jack Foundation",disease:"小児・AYA世代がん",activity:"若年成人（AYA）がん患者の心身支援プログラム",url:"https://www.dearjackfoundation.org",booth:"13000",type:"ASCO®主催無料ブース"},
+  {name:"Debbie's Dream Foundation: Curing Stomach Cancer",disease:"胃がん",activity:"胃がん研究資金助成・啓発・患者支援",url:"https://www.debbiedream.org",booth:"13000",type:"ASCO®主催無料ブース"},
+  {name:"End Brain Cancer Initiative",disease:"脳腫瘍（GBM）",activity:"膠芽腫など脳腫瘍の研究促進・臨床試験啓発",url:"https://www.endbraincancer.org",booth:"13000",type:"ASCO®主催無料ブース"},
+  {name:"End Lung Cancer Now",disease:"肺がん",activity:"肺がん研究推進・政策アドボカシー・患者啓発",url:"https://www.endlungcancernow.org",booth:"13000",type:"ASCO®主催無料ブース"},
+  {name:"Fight Colorectal Cancer",disease:"大腸がん",activity:"大腸がん政策アドボカシー・患者コミュニティ・研究推進",url:"https://www.fightcolorectalcancer.org",booth:"13000",type:"ASCO®主催無料ブース"},
+  {name:"Firefighter Cancer Support Network",disease:"がん全般（消防士）",activity:"消防士のがんリスク啓発・生存者支援・政策提唱",url:"https://www.firefightercancersupport.org",booth:"13000",type:"ASCO®主催無料ブース"},
+  {name:"Gastric Cancer Foundation",disease:"胃がん",activity:"胃がん研究・患者支援・医師教育・スクリーニング啓発",url:"https://www.gastriccancerfoundation.org",booth:"13000",type:"ASCO®主催無料ブース"},
+  {name:"Global Resource for Advancing Cancer Education",disease:"がん全般",activity:"国際的ながん教育リソース・患者アドボカシー支援",url:"https://www.graceoncology.org",booth:"13000",type:"ASCO®主催無料ブース"},
+  {name:"Head for the Cure Foundation",disease:"脳腫瘍",activity:"脳腫瘍研究資金調達・コミュニティ啓発活動",url:"https://www.headforthecure.org",booth:"13000",type:"ASCO®主催無料ブース"},
+  {name:"Health, Hope & Hip-Hop Foundation",disease:"がん全般（マイノリティ）",activity:"マイノリティコミュニティのがん格差解消・啓発",url:"https://www.healthhopehiphop.org",booth:"13000",type:"ASCO®主催無料ブース"},
+  {name:"HealthTree Foundation",disease:"血液がん（多発性骨髄腫等）",activity:"患者データ共有プラットフォーム・研究加速・コミュニティ",url:"https://www.healthtree.org",booth:"13000",type:"ASCO®主催無料ブース"},
+  {name:"HPV Cancers Alliance",disease:"HPV関連がん（子宮頸がん等）",activity:"HPVワクチン普及・HPV関連がん啓発・政策アドボカシー",url:"https://www.hpvcancers.org",booth:"13000",type:"ASCO®主催無料ブース"},
+  {name:"Imerman Angels One-On-One Cancer Support",disease:"がん全般",activity:"がん経験者と患者・家族のマッチングサポート（1対1）",url:"https://www.imermanangels.org",booth:"13000",type:"ASCO®主催無料ブース"},
+  {name:"International Brain Tumour Alliance (IBTA)",disease:"脳腫瘍",activity:"国際的な脳腫瘍患者アドボカシー・研究・医師教育",url:"https://www.theibta.org",booth:"13000",type:"ASCO®主催無料ブース"},
+  {name:"Irish Cancer Society",disease:"がん全般",activity:"アイルランドのがん患者支援・研究・啓発・政策提唱",url:"https://www.cancer.ie",booth:"13000",type:"ASCO®主催無料ブース"},
+  {name:"Kidney Cancer Association",disease:"腎臓がん",activity:"腎臓がん研究支援・患者教育・医師連携・アドボカシー",url:"https://www.kidneycancer.org",booth:"13000",type:"ASCO®主催無料ブース"},
+  {name:"Kits to Heart",disease:"がん全般（ケアパッケージ）",activity:"がん患者へのケアキット提供・心理的サポート",url:"https://www.kitstoheart.org",booth:"13000",type:"ASCO®主催無料ブース"},
+  {name:"Lung Cancer Research Foundation",disease:"肺がん",activity:"肺がん研究資金助成・患者教育・スクリーニング推進",url:"https://www.lungcancerresearchfoundation.org",booth:"13000",type:"ASCO®主催無料ブース"},
+  {name:"LUNGevity Foundation",disease:"肺がん",activity:"肺がん研究・患者支援・サバイバーネットワーク・政策",url:"https://www.lungevity.org",booth:"13000",type:"ASCO®主催無料ブース"},
+  {name:"Man Up To Cancer",disease:"がん全般（男性）",activity:"男性がん患者コミュニティ支援・メンタルヘルス啓発",url:"https://www.manuptocancer.org",booth:"13000",type:"ASCO®主催無料ブース"},
+  {name:"Mesothelioma Applied Research Foundation",disease:"中皮腫",activity:"中皮腫研究・患者支援・医師教育・アスベスト啓発",url:"https://www.curemeso.org",booth:"13000",type:"ASCO®主催無料ブース"},
+  {name:"MIB Agents Osteosarcoma Alliance",disease:"骨肉腫",activity:"骨肉腫（若年患者中心）研究推進・患者コミュニティ支援",url:"https://www.mibagents.org",booth:"13000",type:"ASCO®主催無料ブース"},
+  {name:"My Density Matters",disease:"乳がん（高濃度乳腺）",activity:"高濃度乳腺啓発・スクリーニング格差解消・政策提唱",url:"https://www.mydensitymatters.org",booth:"13000",type:"ASCO®主催無料ブース"},
+  {name:"National Blood Clot Alliance",disease:"血栓症（がん関連）",activity:"がん関連血栓症啓発・患者支援・医師教育",url:"https://www.stoptheclot.org",booth:"13000",type:"ASCO®主催無料ブース"},
+  {name:"National Brain Tumor Society",disease:"脳腫瘍",activity:"脳腫瘍研究資金助成・患者アドボカシー・政策提唱",url:"https://www.braintumor.org",booth:"13000",type:"ASCO®主催無料ブース"},
+  {name:"National Organization for Rare Disorders (NORD)",disease:"希少疾患・希少がん",activity:"希少疾患患者支援・政策アドボカシー・研究推進",url:"https://www.rarediseases.org",booth:"13000",type:"ASCO®主催無料ブース"},
+  {name:"Pancreatic Cancer Action Network (PanCAN)",disease:"膵臓がん",activity:"膵臓がん研究・患者サービス・早期発見・政策アドボカシー",url:"https://www.pancan.org",booth:"13000",type:"ASCO®主催無料ブース"},
+  {name:"Patient Empowerment Network",disease:"がん全般",activity:"患者の治療参加促進・意思決定支援・情報提供",url:"https://www.powerfulpatients.org",booth:"13000",type:"ASCO®主催無料ブース"},
+  {name:"Project PINK BLUE",disease:"がん全般（アフリカ系）",activity:"アフリカ系コミュニティのがん格差解消・患者支援",url:"https://www.projectpinkblue.org",booth:"13000",type:"ASCO®主催無料ブース"},
+  {name:"Rare Cancer Research Foundation",disease:"希少がん",activity:"希少がん研究資金助成・患者支援・研究者連携",url:"https://www.rarecancer.org",booth:"13000",type:"ASCO®主催無料ブース"},
+  {name:"Support For People With Oral And Head And Neck Cancer (SPOHNC)",disease:"頭頸部がん・口腔がん",activity:"頭頸部がん・口腔がん患者支援・リハビリ情報・コミュニティ",url:"https://www.spohnc.org",booth:"13000",type:"ASCO®主催無料ブース"},
+  {name:"Susan G. Komen®",disease:"乳がん",activity:"乳がん研究助成・患者支援・政策アドボカシー・啓発",url:"https://www.komen.org",booth:"13000",type:"ASCO®主催無料ブース"},
+  {name:"The Desmoid Project",disease:"デスモイド腫瘍",activity:"デスモイド腫瘍（線維腫症）研究・患者コミュニティ・啓発",url:"https://www.thedesmoidproject.org",booth:"13000",type:"ASCO®主催無料ブース"},
+  {name:"The Dorcas Cancer Foundation (TDCF)",disease:"がん全般（アフリカ系）",activity:"アフリカ系女性のがん啓発・検診アクセス支援",url:"https://www.dorcascancerfoundation.org",booth:"13000",type:"ASCO®主催無料ブース"},
+  {name:"ThyCa: Thyroid Cancer Survivors' Association",disease:"甲状腺がん",activity:"甲状腺がん生存者支援・患者教育・研究資金助成",url:"https://www.thyca.org",booth:"13000",type:"ASCO®主催無料ブース"},
+  {name:"Triage Cancer",disease:"がん全般（法律・生活）",activity:"がん患者の法律・生活課題（就労・保険・財政）支援",url:"https://www.triagecancer.org",booth:"13000",type:"ASCO®主催無料ブース"},
+  {name:"VHL Alliance",disease:"VHL病（希少腫瘍症候群）",activity:"VHL病患者支援・研究推進・医師教育・国際連携",url:"https://www.vhl.org",booth:"13000",type:"ASCO®主催無料ブース"},
+  {name:"Wonders & Worries",disease:"がん全般（小児・家族）",activity:"親ががんの子どもへの心理的サポート・専門家カウンセリング",url:"https://www.wondersandworries.org",booth:"13000",type:"ASCO®主催無料ブース"},
+  {name:"Young Adult Survivors United",disease:"AYA世代がん",activity:"若年成人がん生存者コミュニティ・メンタルヘルス・就労支援",url:"https://www.youngadultsurvivorsunited.org",booth:"13000",type:"ASCO®主催無料ブース"},
+  {name:"A Cure In Sight",disease:"眼球メラノーマ（眼がん）",activity:"眼球メラノーマ患者・家族支援、教育、臨床試験啓発、治療法開発促進",url:"https://www.acureinsight.org",booth:"10017",type:"独立ブース"},
+  {name:"Academy of Oncology Nurse & Patient Navigators (AONN+)",disease:"がん全般（看護・患者ナビゲーション）",activity:"腫瘍科ナース・患者ナビゲーター専門職の教育・認定・ネットワーク支援",url:"https://www.aonnonline.org",booth:"11045",type:"独立ブース"},
+  {name:"Advanced Breast Cancer Global Alliance",disease:"進行乳がん（転移性乳がん）",activity:"進行乳がん患者の生活延長・QOL向上のための国際アドボカシー・研究・医師教育・ガイドライン策定",url:"https://www.abcglobalalliance.org",booth:"10020",type:"独立ブース"},
+  {name:"Advocates for Universal DPD/DPYD Testing",disease:"がん全般（フルオロウラシル系化学療法）",activity:"DPD/DPYD遺伝子変異検査の普及推進・フルオロウラシル系薬の副作用死防止の政策アドボカシー",url:"https://www.dpydadvocates.org",booth:"11046",type:"独立ブース"},
+  {name:"American Cancer Society",disease:"がん全般",activity:"がん研究・患者支援・政策アドボカシー・啓発を一体的に実施する米国最大のがん支援団体",url:"https://www.cancer.org",booth:"13013",type:"独立ブース"},
+  {name:"Blood Cancer United（旧 Leukemia & Lymphoma Society）",disease:"血液がん（白血病・リンパ腫・骨髄腫等）",activity:"血液がん研究資金助成・患者情報提供・医師相談サービス・政策アドボカシー・コミュニティ",url:"https://www.bloodcancerunited.org",booth:"10025",type:"独立ブース"},
+  {name:"Blue Faery: The Adrienne Wilson Liver Cancer Association",disease:"肝臓がん（肝細胞がん）",activity:"肝臓がん研究支援・患者啓発・医師教育・スクリーニング推進",url:"https://www.bluefaery.org",booth:"10013",type:"独立ブース"},
+  {name:"CancerBuddy at the Bone Marrow & Cancer Foundation",disease:"血液がん・固形がん全般",activity:"がん・骨髄疾患患者のピアサポートマッチング・コミュニティ構築・資金支援",url:"https://www.bonemarrow.org",booth:"10030",type:"独立ブース"}
+];
+
+const diseaseFilter = document.getElementById('diseaseFilter');
+[...new Set(DATA.map(d => d.disease))].sort().forEach(d => {
+  const o = document.createElement('option');
+  o.value = d; o.textContent = d.length > 18 ? d.slice(0,18)+'…' : d;
+  diseaseFilter.appendChild(o);
+});
+
+let activeTag = '';
+
+function onSearch() {
+  const v = document.getElementById('searchInput').value;
+  const cb = document.getElementById('clearBtn');
+  cb.style.display = v ? 'flex' : 'none';
+  render();
+}
+
+function clearSearch() {
+  document.getElementById('searchInput').value = '';
+  document.getElementById('clearBtn').style.display = 'none';
+  render();
+}
+
+function setTag(btn, tag) {
+  if (activeTag === tag) {
+    activeTag = '';
+    btn.classList.remove('active');
+  } else {
+    document.querySelectorAll('.tag-btn').forEach(b => b.classList.remove('active'));
+    activeTag = tag;
+    btn.classList.add('active');
+  }
+  render();
+}
+
+function resetAll() {
+  document.getElementById('searchInput').value = '';
+  document.getElementById('clearBtn').style.display = 'none';
+  document.getElementById('diseaseFilter').value = '';
+  document.getElementById('typeFilter').value = '';
+  activeTag = '';
+  document.querySelectorAll('.tag-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('select').forEach(s => s.classList.remove('active-filter'));
+  render();
+}
+
+function hl(text, q) {
+  if (!q) return text;
+  return text.replace(new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi'), '<span class="highlight">$1</span>');
+}
+
+function render() {
+  const q = document.getElementById('searchInput').value.trim().toLowerCase();
+  const dVal = diseaseFilter.value;
+  const tVal = document.getElementById('typeFilter').value;
+
+  document.getElementById('diseaseFilter').classList.toggle('active-filter', !!dVal);
+  document.getElementById('typeFilter').classList.toggle('active-filter', !!tVal);
+
+  const filtered = DATA.filter(d => {
+    const mQ = !q || [d.name, d.disease, d.activity].some(f => f.toLowerCase().includes(q));
+    const mD = !dVal || d.disease === dVal;
+    const mT = !tVal || d.type === tVal;
+    const mTag = !activeTag || [d.disease, d.activity, d.name].some(f => f.includes(activeTag));
+    return mQ && mD && mT && mTag;
+  });
+
+  document.getElementById('statsText').textContent = `${filtered.length}件 / 全58件`;
+
+  const el = document.getElementById('results');
+  if (!filtered.length) {
+    el.innerHTML = '<div class="empty"><div class="empty-icon">🔍</div><div class="empty-text">該当する団体が見つかりませんでした</div></div>';
+    return;
+  }
+
+  el.innerHTML = filtered.map(d => {
+    const isMain = d.booth === '13000';
+    const boothClass = isMain ? 'booth-main' : 'booth-indep';
+    const boothLabel = isMain ? `ブース #13000` : `ブース #${d.booth}`;
+    const domain = d.url.replace('https://www.','').replace('https://','');
+    return `<div class="card">
+      <div class="card-header">
+        <div class="card-name">${hl(d.name, q)}</div>
+        <span class="card-booth ${boothClass}">${boothLabel}</span>
+      </div>
+      <div><span class="disease-tag">${hl(d.disease, q)}</span></div>
+      <div class="card-activity">${hl(d.activity, q)}</div>
+      <div class="card-footer">
+        <span class="card-type">${d.type}</span>
+        <a class="card-link" href="${d.url}" target="_blank">${domain}</a>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+render();
+</script>
+</body>
+</html>
